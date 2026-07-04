@@ -379,6 +379,20 @@ def test_api_health_and_presets():
     assert "hbm3e_8hi_24gb" in presets["architecture_presets"]
 
 
+def test_local_dev_frontend_ports_are_allowed_by_cors():
+    client = TestClient(app)
+    response = client.options(
+        "/presets",
+        headers={
+            "Origin": "http://127.0.0.1:5175",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5175"
+
+
 def test_process_schema_rejects_equipment_recipe_fields():
     client = TestClient(app)
     response = client.post(
