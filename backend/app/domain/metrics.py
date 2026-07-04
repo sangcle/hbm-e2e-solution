@@ -43,6 +43,20 @@ class SimulationMetrics(BaseModel):
     assumption_coverage: AssumptionCoverage
     backend_metadata: dict[str, Any] = Field(default_factory=dict)
 
+    process_yield_score: float | None = None
+    process_defect_risk: float | None = None
+    capacity_good_die_ratio: float | None = None
+    process_bandwidth_derating_factor: float | None = None
+    process_latency_penalty_ns: float | None = None
+    process_power_delta_w: float | None = None
+    process_thermal_resistance_delta_c_per_w: float | None = None
+    reliability_margin: float | None = None
+    process_confidence_level: str | None = None
+    process_calibration_required: bool | None = None
+    process_public_proxy_used: bool | None = None
+    process_stage_risks: dict[str, float] | None = None
+    process_notes: list[str] | None = None
+
 
 class Recommendation(BaseModel):
     code: str

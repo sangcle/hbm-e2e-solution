@@ -8,6 +8,7 @@ from .constraints import ConstraintResult
 from .enums import SimulationMode
 from .metadata import RunMetadata
 from .metrics import Recommendation, SimulationMetrics
+from .process import ProcessParameters
 from .target import ProductTarget
 from .workload import WorkloadProfile
 
@@ -21,6 +22,7 @@ class CandidateInput(BaseModel):
     assumption_preset: str = "public_hbm_mvp_v0"
     simulation_mode: SimulationMode = SimulationMode.ANALYTICAL
     backend_options: dict[str, Any] = Field(default_factory=dict)
+    process_parameters: ProcessParameters | None = None
 
 
 class SimulateRequest(CandidateInput):

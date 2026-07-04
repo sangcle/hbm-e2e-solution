@@ -26,6 +26,7 @@ from backend.app.storage.repository import ResultRepository
 
 from .analytical_engine import AnalyticalEngine
 from .constraint_evaluator import ConstraintEvaluator
+from .process_model import apply_process_effects
 from .recommendations import RecommendationEngine
 from .scoring import ScoringEngine
 
@@ -61,6 +62,12 @@ class SimulationService:
             metrics = self.analytical_engine.run(architecture, workload, assumptions)
 
         metrics.backend_metadata.setdefault("confidence_level", assumptions.confidence_level.value)
+        metrics = apply_process_effects(
+            metrics,
+            assumptions,
+            request.process_parameters,
+            capacity_accounting_mode=str(request.backend_options.get("capacity_accounting_mode", "shipped_good_unit")),
+        )
         constraints = self.constraint_evaluator.evaluate(request.target, architecture, metrics)
         score, breakdown = self.scoring_engine.score(request.target, metrics, constraints)
         bottlenecks, recommendations = self.recommendation_engine.generate(request.target, metrics, constraints)
@@ -108,6 +115,7 @@ class SimulationService:
                 assumption_preset=candidate.assumption_preset,
                 simulation_mode=candidate.simulation_mode,
                 backend_options=candidate.backend_options,
+                process_parameters=candidate.process_parameters,
             )
             results.append(self.run(simulate_request, persist=True))
         results.sort(key=lambda item: (item.constraints.is_feasible, item.feasibility_score), reverse=True)
@@ -142,6 +150,9 @@ class SimulationService:
             "assumption_version": ASSUMPTION_VERSION,
             "simulation_mode": request.simulation_mode.value,
             "backend_adapter_version": BACKEND_ADAPTER_VERSION,
+            "process_parameters": request.process_parameters.model_dump(mode="json")
+            if request.process_parameters is not None
+            else None,
         }
         return stable_hash(payload, "cand")
 
@@ -154,6 +165,9 @@ class SimulationService:
             "assumption_preset": request.assumption_preset,
             "simulation_mode": request.simulation_mode.value,
             "backend_options": request.backend_options,
+            "process_parameters": request.process_parameters.model_dump(mode="json")
+            if request.process_parameters is not None
+            else None,
             "model_version": MODEL_VERSION,
             "formula_version": FORMULA_VERSION,
             "preset_version": PRESET_VERSION,

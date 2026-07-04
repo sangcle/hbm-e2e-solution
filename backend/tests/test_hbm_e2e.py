@@ -80,6 +80,119 @@ def test_infeasible_target_marks_constraint(tmp_path: Path):
     assert "effective_bandwidth" in result.constraints.violated_constraints
 
 
+def test_empty_process_parameters_do_not_affect_metrics(tmp_path: Path):
+    service = SimulationService(repository=ResultRepository(tmp_path))
+    base_request = SimulateRequest(
+        target=ProductTarget(capacity_gb=16, target_bandwidth_GBps=700, power_policy="warn"),
+        architecture_preset="hbm3e_8hi_24gb",
+        workload_preset="ai_inference",
+    )
+    base_result = service.run(base_request, persist=False)
+    process_result = service.run(
+        SimulateRequest(
+            target=base_request.target,
+            architecture_preset=base_request.architecture_preset,
+            workload_preset=base_request.workload_preset,
+            process_parameters={
+                "tsv": {
+                    "tsv_void_fraction": {
+                        "value": None,
+                        "unit": "ratio",
+                        "data_type": "continuous",
+                        "calibration_required": True,
+                    }
+                }
+            },
+        ),
+        persist=False,
+    )
+
+    assert process_result.metrics.process_yield_score is None
+    assert process_result.metrics.effective_bandwidth_GBps == pytest.approx(base_result.metrics.effective_bandwidth_GBps)
+    assert process_result.metrics.total_power_w == pytest.approx(base_result.metrics.total_power_w)
+
+
+def test_process_parameters_apply_proxy_effects_and_report(tmp_path: Path):
+    service = SimulationService(repository=ResultRepository(tmp_path))
+    base_request = SimulateRequest(
+        target=ProductTarget(capacity_gb=16, target_bandwidth_GBps=700, power_policy="warn"),
+        architecture_preset="hbm3e_8hi_24gb",
+        workload_preset="ai_inference",
+    )
+    base_result = service.run(base_request, persist=False)
+    request = SimulateRequest(
+        target=base_request.target,
+        architecture_preset=base_request.architecture_preset,
+        workload_preset=base_request.workload_preset,
+        process_parameters={
+            "dram_wafer_fab": {
+                "wafer_good_die_ratio": {
+                    "value": 0.95,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                }
+            },
+            "tsv": {
+                "tsv_resistance_distribution_mohm": {
+                    "value": {"mean": 60.0, "p95": 90.0},
+                    "unit": "mOhm",
+                    "data_type": "distribution",
+                    "calibration_required": True,
+                },
+                "tsv_void_fraction": {
+                    "value": 0.03,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                },
+            },
+            "rdl_micro_bump": {
+                "micro_bump_open_short_rate": {
+                    "value": 0.003,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                }
+            },
+            "bonding": {
+                "die_to_die_overlay_error_um": {
+                    "value": 0.8,
+                    "unit": "um",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                },
+                "bond_void_fraction": {
+                    "value": 0.02,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                },
+            },
+            "interposer_package": {
+                "thermal_interface_void_fraction": {
+                    "value": 0.04,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": True,
+                }
+            },
+        },
+    )
+    result = service.run(request, persist=True)
+    report = (tmp_path / result.run_id / "report.md").read_text(encoding="utf-8")
+
+    assert result.metrics.process_yield_score is not None
+    assert result.metrics.process_public_proxy_used is True
+    assert result.metrics.process_calibration_required is True
+    assert result.metrics.effective_bandwidth_GBps < base_result.metrics.effective_bandwidth_GBps
+    assert result.metrics.average_latency_ns > base_result.metrics.average_latency_ns
+    assert result.metrics.total_power_w > base_result.metrics.total_power_w
+    assert result.metrics.usable_capacity_gb == pytest.approx(base_result.metrics.usable_capacity_gb)
+    assert "## Process Quality" in report
+    assert "Process model uses generalized public/proxy quality" in report
+
+
 def test_compare_sorts_feasible_and_score(tmp_path: Path):
     service = SimulationService(repository=ResultRepository(tmp_path))
     request = CompareRequest(
@@ -201,6 +314,30 @@ def test_api_health_and_presets():
     assert client.get("/health").status_code == 200
     presets = client.get("/presets").json()
     assert "hbm3e_8hi_24gb" in presets["architecture_presets"]
+
+
+def test_process_schema_rejects_equipment_recipe_fields():
+    client = TestClient(app)
+    response = client.post(
+        "/simulate/run",
+        json={
+            "target": {"capacity_gb": 16, "target_bandwidth_GBps": 700},
+            "architecture_preset": "hbm3e_8hi_24gb",
+            "workload_preset": "ai_inference",
+            "process_parameters": {
+                "tsv": {
+                    "drie_gas_flow_sccm": {
+                        "value": 120,
+                        "unit": "sccm",
+                        "data_type": "continuous",
+                        "calibration_required": True,
+                    }
+                }
+            },
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_ramulator2_build_diagnostics_reports_current_environment():

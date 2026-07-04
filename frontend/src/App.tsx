@@ -60,6 +60,69 @@ type Workload = {
   bandwidth_demand_GBps: number;
 };
 
+type ProcessParameterValue = {
+  value: number | string | Record<string, number> | number[] | null;
+  unit?: string | null;
+  data_type: "continuous" | "categorical" | "binary" | "distribution" | "image_derived" | "time_series";
+  calibration_required: boolean;
+};
+
+type ProcessParameters = {
+  schema_version: string;
+  process_flow_id: string;
+  source_type: string;
+  confidence_level: string;
+  calibration_status: string;
+  dram_wafer_fab?: {
+    wafer_good_die_ratio?: ProcessParameterValue;
+    cell_repair_fraction?: ProcessParameterValue;
+    leakage_current_distribution?: ProcessParameterValue;
+  };
+  tsv?: {
+    tsv_continuity_fail_rate?: ProcessParameterValue;
+    tsv_resistance_distribution_mohm?: ProcessParameterValue;
+    tsv_void_fraction?: ProcessParameterValue;
+  };
+  wafer_thinning?: {
+    post_thinning_ttv_um?: ProcessParameterValue;
+    wafer_warpage_um?: ProcessParameterValue;
+    backside_crack_chipping_density?: ProcessParameterValue;
+  };
+  rdl_micro_bump?: {
+    micro_bump_height_coplanarity_sigma_um?: ProcessParameterValue;
+    micro_bump_open_short_rate?: ProcessParameterValue;
+  };
+  bonding?: {
+    bonding_technology?: ProcessParameterValue;
+    die_to_die_overlay_error_um?: ProcessParameterValue;
+    bond_void_fraction?: ProcessParameterValue;
+  };
+  underfill_molding?: {
+    underfill_void_fraction?: ProcessParameterValue;
+  };
+  interposer_package?: {
+    thermal_interface_void_fraction?: ProcessParameterValue;
+  };
+};
+
+type ProcessInputState = {
+  wafer_good_die_ratio: number;
+  cell_repair_fraction: number;
+  leakage_current_distribution: number;
+  tsv_continuity_fail_rate: number;
+  tsv_resistance_distribution_mohm: number;
+  tsv_void_fraction: number;
+  post_thinning_ttv_um: number;
+  wafer_warpage_um: number;
+  backside_crack_chipping_density: number;
+  micro_bump_height_coplanarity_sigma_um: number;
+  micro_bump_open_short_rate: number;
+  die_to_die_overlay_error_um: number;
+  bond_void_fraction: number;
+  underfill_void_fraction: number;
+  thermal_interface_void_fraction: number;
+};
+
 type Presets = {
   architecture_presets: Record<string, Architecture>;
   workload_presets: Record<string, Workload>;
@@ -93,6 +156,19 @@ type DesignCandidate = {
     read_request_count?: number | null;
     write_request_count?: number | null;
     simulated_cycles?: number | null;
+    process_yield_score?: number | null;
+    process_defect_risk?: number | null;
+    capacity_good_die_ratio?: number | null;
+    process_bandwidth_derating_factor?: number | null;
+    process_latency_penalty_ns?: number | null;
+    process_power_delta_w?: number | null;
+    process_thermal_resistance_delta_c_per_w?: number | null;
+    reliability_margin?: number | null;
+    process_confidence_level?: string | null;
+    process_calibration_required?: boolean | null;
+    process_public_proxy_used?: boolean | null;
+    process_stage_risks?: Record<string, number> | null;
+    process_notes?: string[] | null;
     backend_metadata: {
       status?: string;
       backend?: string;
@@ -144,6 +220,70 @@ const defaultTarget: Target = {
   bandwidth_constraint_metric: "effective"
 };
 
+const defaultProcessInputs: ProcessInputState = {
+  wafer_good_die_ratio: 0.96,
+  cell_repair_fraction: 0.02,
+  leakage_current_distribution: 0.2,
+  tsv_continuity_fail_rate: 0.001,
+  tsv_resistance_distribution_mohm: 35,
+  tsv_void_fraction: 0.01,
+  post_thinning_ttv_um: 3,
+  wafer_warpage_um: 60,
+  backside_crack_chipping_density: 0.05,
+  micro_bump_height_coplanarity_sigma_um: 1,
+  micro_bump_open_short_rate: 0.001,
+  die_to_die_overlay_error_um: 0.3,
+  bond_void_fraction: 0.01,
+  underfill_void_fraction: 0.01,
+  thermal_interface_void_fraction: 0.02
+};
+
+const processFieldGroups: Array<{
+  title: string;
+  fields: Array<{ key: keyof ProcessInputState; label: string; unit: string }>;
+}> = [
+  {
+    title: "DRAM Wafer Fab",
+    fields: [
+      { key: "wafer_good_die_ratio", label: "Good Die Ratio", unit: "ratio" },
+      { key: "cell_repair_fraction", label: "Cell Repair", unit: "ratio" },
+      { key: "leakage_current_distribution", label: "Leakage Index", unit: "index" }
+    ]
+  },
+  {
+    title: "TSV",
+    fields: [
+      { key: "tsv_continuity_fail_rate", label: "Continuity Fail", unit: "ratio" },
+      { key: "tsv_resistance_distribution_mohm", label: "Resistance", unit: "mOhm" },
+      { key: "tsv_void_fraction", label: "Void Fraction", unit: "ratio" }
+    ]
+  },
+  {
+    title: "Thinning",
+    fields: [
+      { key: "post_thinning_ttv_um", label: "TTV", unit: "um" },
+      { key: "wafer_warpage_um", label: "Warpage", unit: "um" },
+      { key: "backside_crack_chipping_density", label: "Crack Density", unit: "count/mm2" }
+    ]
+  },
+  {
+    title: "Bump/Bond",
+    fields: [
+      { key: "micro_bump_height_coplanarity_sigma_um", label: "Coplanarity Sigma", unit: "um" },
+      { key: "micro_bump_open_short_rate", label: "Open/Short", unit: "ratio" },
+      { key: "die_to_die_overlay_error_um", label: "Overlay Error", unit: "um" },
+      { key: "bond_void_fraction", label: "Bond Void", unit: "ratio" }
+    ]
+  },
+  {
+    title: "Package",
+    fields: [
+      { key: "underfill_void_fraction", label: "Underfill Void", unit: "ratio" },
+      { key: "thermal_interface_void_fraction", label: "TIM Void", unit: "ratio" }
+    ]
+  }
+];
+
 function App() {
   const [health, setHealth] = useState<"online" | "offline">("offline");
   const [ramulatorStatus, setRamulatorStatus] = useState("unknown");
@@ -154,6 +294,8 @@ function App() {
   const [workloadPreset, setWorkloadPreset] = useState("ai_training");
   const [assumptionPreset, setAssumptionPreset] = useState("public_hbm_mvp_v0");
   const [simulationMode, setSimulationMode] = useState<"analytical" | "ramulator2">("analytical");
+  const [processEnabled, setProcessEnabled] = useState(false);
+  const [processInputs, setProcessInputs] = useState<ProcessInputState>(defaultProcessInputs);
   const [result, setResult] = useState<DesignCandidate | null>(null);
   const [compareResults, setCompareResults] = useState<DesignCandidate[]>([]);
   const [report, setReport] = useState("");
@@ -261,7 +403,8 @@ function App() {
           backend_options:
             simulationMode === "ramulator2"
               ? { trace_request_count: 4096, max_controllers: 4, frontend: "load_store_trace" }
-              : {}
+              : {},
+          process_parameters: buildProcessParameters()
         })
       });
       const data = await response.json();
@@ -296,7 +439,8 @@ function App() {
             backend_options:
               simulationMode === "ramulator2"
                 ? { trace_request_count: 4096, max_controllers: 4, frontend: "load_store_trace" }
-                : {}
+                : {},
+            process_parameters: buildProcessParameters()
           }))
         })
       });
@@ -327,6 +471,15 @@ function App() {
       const updated = { ...current, [key]: value } as Architecture;
       return normalizeArchitecture(updated);
     });
+  }
+
+  function updateProcessInput(key: keyof ProcessInputState, value: number) {
+    setProcessInputs((current) => ({ ...current, [key]: value }));
+  }
+
+  function buildProcessParameters(): ProcessParameters | undefined {
+    if (!processEnabled) return undefined;
+    return buildProcessParametersPayload(processInputs);
   }
 
   const activeResults = compareResults.length ? compareResults : result ? [result] : [];
@@ -414,6 +567,35 @@ function App() {
             options={["analytical", "ramulator2"]}
             onChange={(value) => setSimulationMode(value as "analytical" | "ramulator2")}
           />
+        </section>
+
+        <section className="panel-section">
+          <SectionTitle icon={<Activity size={17} />} title="Process Quality" />
+          <label className="check-row">
+            <input
+              type="checkbox"
+              checked={processEnabled}
+              onChange={(event) => setProcessEnabled(event.target.checked)}
+            />
+            <span>Enable process proxy</span>
+          </label>
+          {processEnabled && (
+            <div className="process-inputs">
+              {processFieldGroups.map((group) => (
+                <div key={group.title} className="process-group">
+                  <h3>{group.title}</h3>
+                  {group.fields.map((field) => (
+                    <NumberInput
+                      key={field.key}
+                      label={`${field.label} ${field.unit}`}
+                      value={processInputs[field.key]}
+                      onChange={(value) => updateProcessInput(field.key, value)}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </aside>
 
@@ -541,6 +723,24 @@ function App() {
               <KeyValue label="Backend" value={result?.metrics.backend_metadata?.status || result?.metadata?.simulation_mode || "N/A"} />
               <KeyValue label="Confidence" value={result?.assumptions.confidence_level?.toUpperCase() || "N/A"} />
               <KeyValue label="Coverage" value={result ? `${round(result.metrics.assumption_coverage.coverage_ratio * 100)}%` : "N/A"} />
+            </section>
+
+            <section className="work-section">
+              <SectionTitle icon={<Activity size={17} />} title="Process Quality" />
+              <KeyValue label="Yield" value={formatOptionalPercent(result?.metrics.process_yield_score)} />
+              <KeyValue label="Defect Risk" value={formatOptionalPercent(result?.metrics.process_defect_risk)} />
+              <KeyValue label="Good Die" value={formatOptionalPercent(result?.metrics.capacity_good_die_ratio)} />
+              <KeyValue label="BW Derating" value={formatOptionalNumber(result?.metrics.process_bandwidth_derating_factor)} />
+              <KeyValue label="Latency Add" value={formatOptionalNumber(result?.metrics.process_latency_penalty_ns)} />
+              <KeyValue label="Power Add" value={formatOptionalNumber(result?.metrics.process_power_delta_w)} />
+              <KeyValue label="Reliability" value={formatOptionalPercent(result?.metrics.reliability_margin)} />
+              <KeyValue label="Calibration" value={result?.metrics.process_calibration_required === undefined || result?.metrics.process_calibration_required === null ? "N/A" : String(result.metrics.process_calibration_required)} />
+              <div className="stage-risk-list">
+                {Object.entries(result?.metrics.process_stage_risks || {}).map(([stage, risk]) => (
+                  <KeyValue key={stage} label={stageLabel(stage)} value={formatOptionalPercent(risk)} />
+                ))}
+                {!Object.keys(result?.metrics.process_stage_risks || {}).length && <div className="empty-cell">N/A</div>}
+              </div>
             </section>
 
             <section className="work-section">
@@ -714,6 +914,60 @@ function normalizeArchitecture(source: Architecture): Architecture {
   };
 }
 
+function buildProcessParametersPayload(inputs: ProcessInputState): ProcessParameters {
+  return {
+    schema_version: "process_proxy_v0.1",
+    process_flow_id: "public_hbm_process_proxy_v0",
+    source_type: "proxy",
+    confidence_level: "low",
+    calibration_status: "uncalibrated",
+    dram_wafer_fab: {
+      wafer_good_die_ratio: processValue(inputs.wafer_good_die_ratio, "ratio"),
+      cell_repair_fraction: processValue(inputs.cell_repair_fraction, "ratio"),
+      leakage_current_distribution: processValue(inputs.leakage_current_distribution, "index")
+    },
+    tsv: {
+      tsv_continuity_fail_rate: processValue(inputs.tsv_continuity_fail_rate, "ratio"),
+      tsv_resistance_distribution_mohm: processValue(inputs.tsv_resistance_distribution_mohm, "mOhm"),
+      tsv_void_fraction: processValue(inputs.tsv_void_fraction, "ratio")
+    },
+    wafer_thinning: {
+      post_thinning_ttv_um: processValue(inputs.post_thinning_ttv_um, "um"),
+      wafer_warpage_um: processValue(inputs.wafer_warpage_um, "um"),
+      backside_crack_chipping_density: processValue(inputs.backside_crack_chipping_density, "count/mm2")
+    },
+    rdl_micro_bump: {
+      micro_bump_height_coplanarity_sigma_um: processValue(inputs.micro_bump_height_coplanarity_sigma_um, "um"),
+      micro_bump_open_short_rate: processValue(inputs.micro_bump_open_short_rate, "ratio")
+    },
+    bonding: {
+      bonding_technology: {
+        value: "hybrid_or_micro_bump_public_proxy",
+        unit: null,
+        data_type: "categorical",
+        calibration_required: true
+      },
+      die_to_die_overlay_error_um: processValue(inputs.die_to_die_overlay_error_um, "um"),
+      bond_void_fraction: processValue(inputs.bond_void_fraction, "ratio")
+    },
+    underfill_molding: {
+      underfill_void_fraction: processValue(inputs.underfill_void_fraction, "ratio")
+    },
+    interposer_package: {
+      thermal_interface_void_fraction: processValue(inputs.thermal_interface_void_fraction, "ratio")
+    }
+  };
+}
+
+function processValue(value: number, unit: string): ProcessParameterValue {
+  return {
+    value,
+    unit,
+    data_type: "continuous",
+    calibration_required: true
+  };
+}
+
 function buildCompareVariants(current: Architecture): Architecture[] {
   const stackCount = current.stack_count;
   return [
@@ -772,6 +1026,13 @@ function artifactNames(artifacts: Record<string, string> | undefined) {
   const names = Object.keys(artifacts || {});
   if (!names.length) return "N/A";
   return names.slice(0, 5).join(", ");
+}
+
+function stageLabel(stage: string) {
+  return stage
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function marginText(value: number, suffix: string) {

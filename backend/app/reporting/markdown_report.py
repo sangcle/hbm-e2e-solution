@@ -68,6 +68,35 @@ def render_markdown_report(result: DesignCandidate) -> str:
         "## Recommendations",
         "",
     ]
+    if metrics.process_yield_score is not None:
+        process_lines = [
+            "## Process Quality",
+            "",
+            f"- Yield score: {metrics.process_yield_score:.3f}",
+            f"- Defect risk: {metrics.process_defect_risk:.3f}",
+            f"- Good die ratio: {metrics.capacity_good_die_ratio:.3f}",
+            f"- Bandwidth derating factor: {metrics.process_bandwidth_derating_factor:.3f}",
+            f"- Latency penalty: {metrics.process_latency_penalty_ns:.2f} ns",
+            f"- Power delta: {metrics.process_power_delta_w:.2f} W",
+            f"- Thermal resistance delta: {metrics.process_thermal_resistance_delta_c_per_w:.3f} C/W",
+            f"- Reliability margin: {metrics.reliability_margin:.3f}",
+            f"- Confidence: `{metrics.process_confidence_level}`",
+            f"- Calibration required: `{metrics.process_calibration_required}`",
+            f"- Public proxy used: `{metrics.process_public_proxy_used}`",
+            "",
+        ]
+        if metrics.process_stage_risks:
+            process_lines.extend(["### Process Stage Risks", ""])
+            for stage, risk in metrics.process_stage_risks.items():
+                process_lines.append(f"- {stage}: {risk:.3f}")
+            process_lines.append("")
+        if metrics.process_notes:
+            process_lines.extend(["### Process Notes", ""])
+            for note in metrics.process_notes:
+                process_lines.append(f"- {note}")
+            process_lines.append("")
+        backend_index = lines.index("## Backend Evidence")
+        lines[backend_index:backend_index] = process_lines
     if result.recommendations:
         for rec in result.recommendations:
             lines.append(f"- **{rec.code}** ({rec.severity}): {rec.message}")

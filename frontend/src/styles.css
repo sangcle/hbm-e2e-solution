@@ -162,6 +162,25 @@ button.primary {
   width: 16px;
 }
 
+.process-inputs {
+  display: grid;
+  gap: 12px;
+}
+
+.process-group {
+  border-top: 1px solid #e2e6de;
+  display: grid;
+  gap: 9px;
+  padding-top: 10px;
+}
+
+.process-group h3 {
+  color: #555d53;
+  font-size: 12px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
 .workspace {
   display: flex;
   flex-direction: column;
@@ -377,6 +396,15 @@ th {
   color: #20231f;
   font-size: 13px;
   overflow-wrap: anywhere;
+}
+
+.stage-risk-list {
+  display: grid;
+  gap: 0;
+}
+
+.stage-risk-list .key-value:first-child {
+  margin-top: 2px;
 }
 
 .recommendation-list {
