@@ -1,0 +1,7 @@
+SCHEMA_VERSION = "1.0.0"
+API_VERSION = "1.0.0"
+MODEL_VERSION = "analytical-hbm-v1"
+FORMULA_VERSION = "formula-v1"
+PRESET_VERSION = "preset-public-hbm-v1"
+ASSUMPTION_VERSION = "public_hbm_mvp_v0"
+BACKEND_ADAPTER_VERSION = "ramulator2-adapter-v1"

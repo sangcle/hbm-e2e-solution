@@ -1,0 +1,15 @@
+.venv/
+/ramulator2/
+__pycache__/
+.pytest_cache/
+*.pyc
+node_modules/
+dist/
+results/*
+!results/.gitkeep
+backend/app/__pycache__/
+backend/app/**/__pycache__/
+frontend/.vite/
+frontend/*.tsbuildinfo
+logs/
+*.log
