@@ -83,6 +83,11 @@ def render_markdown_report(result: DesignCandidate) -> str:
             f"- Confidence: `{metrics.process_confidence_level}`",
             f"- Calibration required: `{metrics.process_calibration_required}`",
             f"- Public proxy used: `{metrics.process_public_proxy_used}`",
+            f"- Model mode: `{metrics.process_model_mode}`",
+            f"- Calibration artifact: `{metrics.process_calibration_artifact_id or 'N/A'}`",
+            f"- Calibration dataset: `{metrics.process_calibration_dataset_id or 'N/A'}`",
+            f"- Calibration model version: `{metrics.process_calibration_model_version or 'N/A'}`",
+            f"- Calibration sample count: {metrics.process_calibration_sample_count if metrics.process_calibration_sample_count is not None else 'N/A'}",
             "",
         ]
         if metrics.process_stage_risks:

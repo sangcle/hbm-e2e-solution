@@ -1,0 +1,61 @@
+{
+  "artifact_id": "public_proxy_v0",
+  "model_mode": "proxy",
+  "dataset_id": null,
+  "model_version": "process_proxy_v0.1",
+  "sample_count": 0,
+  "confidence_level": "low",
+  "stage_weights": {
+    "dram_wafer_fab": 1.2,
+    "tsv": 1.35,
+    "wafer_thinning": 0.85,
+    "rdl_micro_bump": 1.15,
+    "bonding": 1.25,
+    "underfill_molding": 0.8,
+    "interposer_package": 0.8,
+    "inspection_test_burn_in": 1.0
+  },
+  "scale_factors": {
+    "cell_repair_fraction": 0.2,
+    "leakage_current_distribution": 1.0,
+    "tsv_continuity_fail_rate": 0.02,
+    "tsv_resistance_distribution_mohm": 150.0,
+    "tsv_void_fraction": 0.08,
+    "post_thinning_ttv_um": 15.0,
+    "wafer_warpage_um": 250.0,
+    "backside_crack_chipping_density": 1.0,
+    "micro_bump_height_coplanarity_sigma_um": 5.0,
+    "micro_bump_open_short_rate": 0.02,
+    "die_to_die_overlay_error_um": 5.0,
+    "bond_void_fraction": 0.08,
+    "underfill_void_fraction": 0.08,
+    "thermal_interface_void_fraction": 0.08,
+    "burn_in_fallout_rate": 0.05
+  },
+  "effect_coefficients": {
+    "bandwidth_tsv": 0.045,
+    "bandwidth_rdl_micro_bump": 0.035,
+    "bandwidth_bonding": 0.035,
+    "bandwidth_interposer_package": 0.02,
+    "bandwidth_floor": 0.8,
+    "latency_interconnect_ns_per_risk": 6.0,
+    "latency_repair_ns_per_fraction": 3.0,
+    "latency_thermal_ns_per_risk": 4.0,
+    "latency_max_ns": 20.0,
+    "power_interconnect_fraction": 0.025,
+    "power_thermal_fraction": 0.018,
+    "power_dram_fraction": 0.012,
+    "power_min_delta_w": 2.0,
+    "power_max_fraction": 0.08,
+    "thermal_resistance_thermal_c_per_w": 0.75,
+    "thermal_resistance_underfill_c_per_w": 0.1,
+    "thermal_resistance_max_c_per_w": 1.5,
+    "reliability_defect_weight": 0.8,
+    "reliability_thermal_weight": 0.35,
+    "capacity_defect_weight": 0.35
+  },
+  "notes": [
+    "Public proxy coefficients for directional comparison only.",
+    "Replace this artifact with internally calibrated coefficients before sign-off use."
+  ]
+}

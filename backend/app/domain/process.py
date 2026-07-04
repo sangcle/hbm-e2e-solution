@@ -15,6 +15,7 @@ ProcessDataType = Literal[
     "time_series",
 ]
 CalibrationStatus = Literal["uncalibrated", "partially_calibrated", "calibrated"]
+ProcessCalculationMode = Literal["auto", "proxy", "calibrated"]
 
 
 class ProcessParameterValue(BaseModel):
@@ -115,6 +116,11 @@ class ProcessParameters(BaseModel):
     source_type: SourceType = SourceType.PROXY
     confidence_level: ConfidenceLevel = ConfidenceLevel.LOW
     calibration_status: CalibrationStatus = "uncalibrated"
+    calculation_mode: ProcessCalculationMode = "auto"
+    calibration_artifact_id: str | None = None
+    calibration_dataset_id: str | None = None
+    calibration_model_version: str | None = None
+    calibration_sample_count: int | None = Field(default=None, ge=0)
 
     dram_wafer_fab: DramWaferFabProcess | None = None
     tsv: TsvProcess | None = None
@@ -139,5 +145,10 @@ class ProcessEffects(BaseModel):
     confidence_level: ConfidenceLevel = ConfidenceLevel.LOW
     calibration_required: bool = True
     public_proxy_used: bool = True
+    model_mode: Literal["proxy", "calibrated"] = "proxy"
+    calibration_artifact_id: str | None = None
+    calibration_dataset_id: str | None = None
+    calibration_model_version: str | None = None
+    calibration_sample_count: int | None = None
     stage_risks: dict[str, float] = Field(default_factory=dict)
     notes: list[str] = Field(default_factory=list)

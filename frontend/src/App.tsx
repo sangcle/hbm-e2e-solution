@@ -73,6 +73,11 @@ type ProcessParameters = {
   source_type: string;
   confidence_level: string;
   calibration_status: string;
+  calculation_mode: string;
+  calibration_artifact_id?: string | null;
+  calibration_dataset_id?: string | null;
+  calibration_model_version?: string | null;
+  calibration_sample_count?: number | null;
   dram_wafer_fab?: {
     wafer_good_die_ratio?: ProcessParameterValue;
     cell_repair_fraction?: ProcessParameterValue;
@@ -167,6 +172,11 @@ type DesignCandidate = {
     process_confidence_level?: string | null;
     process_calibration_required?: boolean | null;
     process_public_proxy_used?: boolean | null;
+    process_model_mode?: string | null;
+    process_calibration_artifact_id?: string | null;
+    process_calibration_dataset_id?: string | null;
+    process_calibration_model_version?: string | null;
+    process_calibration_sample_count?: number | null;
     process_stage_risks?: Record<string, number> | null;
     process_notes?: string[] | null;
     backend_metadata: {
@@ -734,6 +744,10 @@ function App() {
               <KeyValue label="Latency Add" value={formatOptionalNumber(result?.metrics.process_latency_penalty_ns)} />
               <KeyValue label="Power Add" value={formatOptionalNumber(result?.metrics.process_power_delta_w)} />
               <KeyValue label="Reliability" value={formatOptionalPercent(result?.metrics.reliability_margin)} />
+              <KeyValue label="Mode" value={result?.metrics.process_model_mode || "N/A"} />
+              <KeyValue label="Dataset" value={result?.metrics.process_calibration_dataset_id || "N/A"} />
+              <KeyValue label="Model Ver" value={result?.metrics.process_calibration_model_version || "N/A"} />
+              <KeyValue label="Samples" value={formatOptionalNumber(result?.metrics.process_calibration_sample_count)} />
               <KeyValue label="Calibration" value={result?.metrics.process_calibration_required === undefined || result?.metrics.process_calibration_required === null ? "N/A" : String(result.metrics.process_calibration_required)} />
               <div className="stage-risk-list">
                 {Object.entries(result?.metrics.process_stage_risks || {}).map(([stage, risk]) => (
@@ -921,6 +935,7 @@ function buildProcessParametersPayload(inputs: ProcessInputState): ProcessParame
     source_type: "proxy",
     confidence_level: "low",
     calibration_status: "uncalibrated",
+    calculation_mode: "proxy",
     dram_wafer_fab: {
       wafer_good_die_ratio: processValue(inputs.wafer_good_die_ratio, "ratio"),
       cell_repair_fraction: processValue(inputs.cell_repair_fraction, "ratio"),

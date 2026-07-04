@@ -54,6 +54,11 @@ class SimulationMetrics(BaseModel):
     process_confidence_level: str | None = None
     process_calibration_required: bool | None = None
     process_public_proxy_used: bool | None = None
+    process_model_mode: str | None = None
+    process_calibration_artifact_id: str | None = None
+    process_calibration_dataset_id: str | None = None
+    process_calibration_model_version: str | None = None
+    process_calibration_sample_count: int | None = None
     process_stage_risks: dict[str, float] | None = None
     process_notes: list[str] | None = None
 

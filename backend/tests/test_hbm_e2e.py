@@ -185,12 +185,75 @@ def test_process_parameters_apply_proxy_effects_and_report(tmp_path: Path):
     assert result.metrics.process_yield_score is not None
     assert result.metrics.process_public_proxy_used is True
     assert result.metrics.process_calibration_required is True
+    assert result.metrics.process_model_mode == "proxy"
+    assert result.metrics.process_calibration_artifact_id == "public_proxy_v0"
     assert result.metrics.effective_bandwidth_GBps < base_result.metrics.effective_bandwidth_GBps
     assert result.metrics.average_latency_ns > base_result.metrics.average_latency_ns
     assert result.metrics.total_power_w > base_result.metrics.total_power_w
     assert result.metrics.usable_capacity_gb == pytest.approx(base_result.metrics.usable_capacity_gb)
     assert "## Process Quality" in report
     assert "Process model uses generalized public/proxy quality" in report
+
+
+def test_calibrated_process_parameters_use_calibration_artifact(tmp_path: Path):
+    service = SimulationService(repository=ResultRepository(tmp_path))
+    request = SimulateRequest(
+        target=ProductTarget(capacity_gb=16, target_bandwidth_GBps=700, power_policy="warn"),
+        architecture_preset="hbm3e_8hi_24gb",
+        workload_preset="ai_inference",
+        process_parameters={
+            "source_type": "internal_measurement",
+            "confidence_level": "high",
+            "calibration_status": "calibrated",
+            "calculation_mode": "calibrated",
+            "calibration_artifact_id": "hbm_process_calibrated_v0",
+            "calibration_dataset_id": "lot42_stack_measurements_v1",
+            "calibration_model_version": "tsv_bonding_fit_2026q3",
+            "calibration_sample_count": 512,
+            "tsv": {
+                "tsv_resistance_distribution_mohm": {
+                    "value": {"mean": 45.0, "p95": 70.0},
+                    "unit": "mOhm",
+                    "data_type": "distribution",
+                    "calibration_required": False,
+                },
+                "tsv_void_fraction": {
+                    "value": 0.015,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": False,
+                },
+            },
+            "bonding": {
+                "die_to_die_overlay_error_um": {
+                    "value": 0.5,
+                    "unit": "um",
+                    "data_type": "continuous",
+                    "calibration_required": False,
+                },
+                "bond_void_fraction": {
+                    "value": 0.01,
+                    "unit": "ratio",
+                    "data_type": "continuous",
+                    "calibration_required": False,
+                },
+            },
+        },
+    )
+    result = service.run(request, persist=True)
+    report = (tmp_path / result.run_id / "report.md").read_text(encoding="utf-8")
+
+    assert result.metrics.process_model_mode == "calibrated"
+    assert result.metrics.process_public_proxy_used is False
+    assert result.metrics.process_calibration_required is False
+    assert result.metrics.process_confidence_level == "high"
+    assert result.metrics.process_calibration_artifact_id == "hbm_process_calibrated_v0"
+    assert result.metrics.process_calibration_dataset_id == "lot42_stack_measurements_v1"
+    assert result.metrics.process_calibration_model_version == "tsv_bonding_fit_2026q3"
+    assert result.metrics.process_calibration_sample_count == 512
+    assert result.metrics.backend_metadata["process_model"]["model_mode"] == "calibrated"
+    assert "Calibration dataset: `lot42_stack_measurements_v1`" in report
+    assert "Calibration sample count: 512" in report
 
 
 def test_compare_sorts_feasible_and_score(tmp_path: Path):
