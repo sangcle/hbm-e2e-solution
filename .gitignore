@@ -13,3 +13,5 @@ frontend/.vite/
 frontend/*.tsbuildinfo
 logs/
 *.log
+.cache/
+dist-portable/

@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,8 @@ RUN_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_\-]{8,80}$")
 
 class ResultRepository:
     def __init__(self, results_root: Path | None = None) -> None:
-        default_root = Path(__file__).resolve().parents[3] / "results"
+        configured_root = os.getenv("HBM_E2E_RESULTS_DIR")
+        default_root = Path(configured_root) if configured_root else Path(__file__).resolve().parents[3] / "results"
         self.results_root = (results_root or default_root).resolve()
         self.results_root.mkdir(parents=True, exist_ok=True)
 

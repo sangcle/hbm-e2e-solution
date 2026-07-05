@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.api import backends, compare, health, presets, reports, runs, simulate
 
@@ -18,6 +20,16 @@ def _cors_origin_regex() -> str | None:
     if allow_local_dev_ports in {"1", "true", "yes", "on"}:
         return r"http://(127\.0\.0\.1|localhost):\d+"
     return None
+
+
+def _static_dir() -> Path | None:
+    configured = os.getenv("HBM_E2E_STATIC_DIR")
+    if not configured:
+        return None
+    static_dir = Path(configured).resolve()
+    if not (static_dir / "index.html").exists():
+        return None
+    return static_dir
 
 
 app = FastAPI(title="HBM E2E", version="1.0.0")
@@ -38,6 +50,10 @@ app.include_router(compare.router)
 app.include_router(runs.router)
 app.include_router(reports.router)
 app.include_router(backends.router)
+
+static_dir = _static_dir()
+if static_dir is not None:
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
 
 
 @app.exception_handler(RequestValidationError)

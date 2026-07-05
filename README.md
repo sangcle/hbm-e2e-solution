@@ -60,6 +60,8 @@ See `docs/DEPLOYMENT.md` for deployment steps, verification commands, release ch
 
 See `docs/PUBLIC_RELEASE_REVIEW.md` for the latest private-to-public repository review notes.
 
+See `docs/PORTABLE_APP.md` for building a Windows portable app package.
+
 ## Ramulator2 Mode
 
 The backend has a real Ramulator2 integration path. By default it uses the checked runtime bundle in `runtime/ramulator2`; set `RAMULATOR2_HOME` to point at a full source checkout when rebuilding or testing a different Ramulator2 tree.

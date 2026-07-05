@@ -12,7 +12,7 @@ from backend.app.domain.candidate import CompareRequest, CandidateInput, Simulat
 from backend.app.domain.enums import HBMGeneration
 from backend.app.domain.target import ProductTarget
 from backend.app.domain.workload import WorkloadProfile
-from backend.app.main import _cors_origin_regex, _cors_origins, app
+from backend.app.main import _cors_origin_regex, _cors_origins, _static_dir, app
 from backend.app.simulation.bandwidth_model import calculate_bandwidth
 from backend.app.simulation.service import SimulationService
 from backend.app.storage.repository import ResultRepository
@@ -63,6 +63,15 @@ def test_result_and_report_are_persisted(tmp_path: Path):
     assert (run_dir / "report.md").exists()
     assert result.metrics.raw_peak_bandwidth_GBps == pytest.approx(1177.6)
     assert "## Backend Evidence" in (run_dir / "report.md").read_text(encoding="utf-8")
+
+
+def test_repository_default_root_can_be_configured(monkeypatch, tmp_path: Path):
+    configured = tmp_path / "portable-results"
+    monkeypatch.setenv("HBM_E2E_RESULTS_DIR", str(configured))
+    repository = ResultRepository()
+
+    assert repository.results_root == configured.resolve()
+    assert configured.exists()
 
 
 def test_infeasible_target_marks_constraint(tmp_path: Path):
@@ -404,6 +413,17 @@ def test_extra_local_dev_cors_ports_are_env_gated(monkeypatch):
 def test_cors_origins_can_be_configured_from_env(monkeypatch):
     monkeypatch.setenv("HBM_E2E_CORS_ORIGINS", "https://hbm.example.com, https://ops.example.com")
     assert _cors_origins() == ["https://hbm.example.com", "https://ops.example.com"]
+
+
+def test_static_dir_is_enabled_only_when_index_exists(monkeypatch, tmp_path: Path):
+    monkeypatch.delenv("HBM_E2E_STATIC_DIR", raising=False)
+    assert _static_dir() is None
+
+    monkeypatch.setenv("HBM_E2E_STATIC_DIR", str(tmp_path))
+    assert _static_dir() is None
+
+    (tmp_path / "index.html").write_text("<!doctype html>", encoding="utf-8")
+    assert _static_dir() == tmp_path.resolve()
 
 
 def test_process_schema_rejects_equipment_recipe_fields():
