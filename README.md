@@ -2,6 +2,11 @@
 
 HBM E2E is a local design exploration workbench for comparing HBM2E, HBM3, and HBM3E memory stack candidates against product targets, workload presets, and explicit modeling assumptions.
 
+## Contact
+
+- LinkedIn ID: `YOUR_LINKEDIN_ID`
+- LinkedIn URL: `https://www.linkedin.com/in/YOUR_LINKEDIN_ID/`
+
 The MVP includes:
 
 - FastAPI backend with stable domain models, synchronous simulation APIs, result storage, Markdown reports, and Ramulator2 status/stats adapter hooks.
