@@ -45,6 +45,10 @@ The frontend expects the backend at `http://127.0.0.1:8000`. Override it with `V
 Results are written below `results/<run_id>/` with `result.json`, `metadata.json`, `input.json`, and `report.md`.
 Ramulator2 backend artifacts are written below `results/<run_id>/backend/` and can be listed or read through the `/runs/{run_id}/artifacts` APIs.
 
+## Deployment Manual
+
+See `docs/DEPLOYMENT.md` for deployment steps, verification commands, release checklist, and the LinkedIn ID field used in release metadata.
+
 ## Ramulator2 Mode
 
 The backend has a real Ramulator2 integration path. By default it uses the checked runtime bundle in `runtime/ramulator2`; set `RAMULATOR2_HOME` to point at a full source checkout when rebuilding or testing a different Ramulator2 tree.
