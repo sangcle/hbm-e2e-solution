@@ -1,8 +1,8 @@
 {
-  "artifact_id": "hbm_process_calibrated_v0",
+  "artifact_id": "synthetic_calibrated_example_v0",
   "model_mode": "calibrated",
-  "dataset_id": "internal_measurement_placeholder_v0",
-  "model_version": "process_calibrated_v0.1",
+  "dataset_id": "synthetic_measurement_example_v0",
+  "model_version": "synthetic_process_calibrated_v0.1",
   "sample_count": 128,
   "confidence_level": "medium",
   "stage_weights": {
@@ -55,7 +55,7 @@
     "capacity_defect_weight": 0.28
   },
   "notes": [
-    "Bundled calibrated-mode example profile for integration tests.",
+    "Synthetic calibrated-mode example profile for integration tests; not measured production data.",
     "Replace with a controlled internal measurement artifact before production use."
   ]
 }

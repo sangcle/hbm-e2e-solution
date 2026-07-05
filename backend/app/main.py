@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,15 +8,24 @@ from fastapi.responses import JSONResponse
 from backend.app.api import backends, compare, health, presets, reports, runs, simulate
 
 
+def _cors_origins() -> list[str]:
+    raw = os.getenv("HBM_E2E_CORS_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173")
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
+def _cors_origin_regex() -> str | None:
+    allow_local_dev_ports = os.getenv("HBM_E2E_CORS_ALLOW_LOCAL_DEV_PORTS", "false").lower()
+    if allow_local_dev_ports in {"1", "true", "yes", "on"}:
+        return r"http://(127\.0\.0\.1|localhost):\d+"
+    return None
+
+
 app = FastAPI(title="HBM E2E", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-    ],
-    allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
+    allow_origins=_cors_origins(),
+    allow_origin_regex=_cors_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -3,7 +3,7 @@
 This directory contains replaceable process-effect calibration artifacts.
 
 - `public_proxy_v0.json` keeps the original public/proxy behavior.
-- `hbm_process_calibrated_v0.json` is a calibrated-mode integration example.
+- `synthetic_calibrated_example_v0.json` is a calibrated-mode synthetic example for integration tests.
 
 For measured process data, add a new JSON profile with:
 

@@ -2,6 +2,8 @@
 
 HBM E2E is a local design exploration workbench for comparing HBM2E, HBM3, and HBM3E memory stack candidates against product targets, workload presets, and explicit modeling assumptions.
 
+License: MIT. Third-party runtime notices are listed in `THIRD_PARTY_NOTICES.md`.
+
 ## Contact
 
 - LinkedIn ID: `minyong-choi-a60645260`
@@ -33,6 +35,8 @@ npm run dev -- --host 127.0.0.1 --port 5173
 
 The frontend expects the backend at `http://127.0.0.1:8000`. Override it with `VITE_API_BASE` if needed.
 
+For alternate local frontend ports, set `HBM_E2E_CORS_ALLOW_LOCAL_DEV_PORTS=true` before starting the backend. For public deployment, set `HBM_E2E_CORS_ORIGINS` to the exact production frontend origin and leave local dev port expansion disabled.
+
 ## API
 
 - `GET /health`
@@ -53,6 +57,8 @@ Ramulator2 backend artifacts are written below `results/<run_id>/backend/` and c
 ## Deployment Manual
 
 See `docs/DEPLOYMENT.md` for deployment steps, verification commands, release checklist, and the LinkedIn ID field used in release metadata.
+
+See `docs/PUBLIC_RELEASE_REVIEW.md` for the latest private-to-public repository review notes.
 
 ## Ramulator2 Mode
 

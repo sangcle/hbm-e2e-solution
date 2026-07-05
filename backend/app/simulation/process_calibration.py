@@ -24,7 +24,7 @@ class ProcessCalibrationProfile(BaseModel):
 
 PROFILE_DIR = Path(__file__).resolve().parents[1] / "calibration" / "process"
 PUBLIC_PROXY_ARTIFACT_ID = "public_proxy_v0"
-DEFAULT_CALIBRATED_ARTIFACT_ID = "hbm_process_calibrated_v0"
+DEFAULT_CALIBRATED_ARTIFACT_ID = "synthetic_calibrated_example_v0"
 
 
 @lru_cache(maxsize=16)

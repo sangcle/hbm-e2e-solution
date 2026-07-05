@@ -12,7 +12,7 @@ from backend.app.domain.candidate import CompareRequest, CandidateInput, Simulat
 from backend.app.domain.enums import HBMGeneration
 from backend.app.domain.target import ProductTarget
 from backend.app.domain.workload import WorkloadProfile
-from backend.app.main import app
+from backend.app.main import _cors_origin_regex, _cors_origins, app
 from backend.app.simulation.bandwidth_model import calculate_bandwidth
 from backend.app.simulation.service import SimulationService
 from backend.app.storage.repository import ResultRepository
@@ -206,7 +206,7 @@ def test_calibrated_process_parameters_use_calibration_artifact(tmp_path: Path):
             "confidence_level": "high",
             "calibration_status": "calibrated",
             "calculation_mode": "calibrated",
-            "calibration_artifact_id": "hbm_process_calibrated_v0",
+            "calibration_artifact_id": "synthetic_calibrated_example_v0",
             "calibration_dataset_id": "lot42_stack_measurements_v1",
             "calibration_model_version": "tsv_bonding_fit_2026q3",
             "calibration_sample_count": 512,
@@ -247,7 +247,7 @@ def test_calibrated_process_parameters_use_calibration_artifact(tmp_path: Path):
     assert result.metrics.process_public_proxy_used is False
     assert result.metrics.process_calibration_required is False
     assert result.metrics.process_confidence_level == "high"
-    assert result.metrics.process_calibration_artifact_id == "hbm_process_calibrated_v0"
+    assert result.metrics.process_calibration_artifact_id == "synthetic_calibrated_example_v0"
     assert result.metrics.process_calibration_dataset_id == "lot42_stack_measurements_v1"
     assert result.metrics.process_calibration_model_version == "tsv_bonding_fit_2026q3"
     assert result.metrics.process_calibration_sample_count == 512
@@ -379,18 +379,31 @@ def test_api_health_and_presets():
     assert "hbm3e_8hi_24gb" in presets["architecture_presets"]
 
 
-def test_local_dev_frontend_ports_are_allowed_by_cors():
+def test_default_frontend_port_is_allowed_by_cors():
     client = TestClient(app)
     response = client.options(
         "/presets",
         headers={
-            "Origin": "http://127.0.0.1:5175",
+            "Origin": "http://127.0.0.1:5173",
             "Access-Control-Request-Method": "GET",
         },
     )
 
     assert response.status_code == 200
-    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5175"
+    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:5173"
+
+
+def test_extra_local_dev_cors_ports_are_env_gated(monkeypatch):
+    monkeypatch.delenv("HBM_E2E_CORS_ALLOW_LOCAL_DEV_PORTS", raising=False)
+    assert _cors_origin_regex() is None
+
+    monkeypatch.setenv("HBM_E2E_CORS_ALLOW_LOCAL_DEV_PORTS", "true")
+    assert _cors_origin_regex() == r"http://(127\.0\.0\.1|localhost):\d+"
+
+
+def test_cors_origins_can_be_configured_from_env(monkeypatch):
+    monkeypatch.setenv("HBM_E2E_CORS_ORIGINS", "https://hbm.example.com, https://ops.example.com")
+    assert _cors_origins() == ["https://hbm.example.com", "https://ops.example.com"]
 
 
 def test_process_schema_rejects_equipment_recipe_fields():
