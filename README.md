@@ -4,8 +4,8 @@ HBM E2E is a local design exploration workbench for comparing HBM2E, HBM3, and H
 
 ## Contact
 
-- LinkedIn ID: `YOUR_LINKEDIN_ID`
-- LinkedIn URL: `https://www.linkedin.com/in/YOUR_LINKEDIN_ID/`
+- LinkedIn ID: `minyong-choi-a60645260`
+- LinkedIn URL: `https://www.linkedin.com/in/minyong-choi-a60645260/`
 
 The MVP includes:
 

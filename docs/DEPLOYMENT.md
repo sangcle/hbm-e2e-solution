@@ -4,13 +4,13 @@
 
 - 서비스명: HBM E2E Design Workbench
 - 저장소: `https://github.com/sangcle/hbm-e2e-solution`
-- 배포 담당 LinkedIn ID: `YOUR_LINKEDIN_ID`
-- LinkedIn URL: `https://www.linkedin.com/in/YOUR_LINKEDIN_ID/`
+- 배포 담당 LinkedIn ID: `minyong-choi-a60645260`
+- LinkedIn URL: `https://www.linkedin.com/in/minyong-choi-a60645260/`
 - 기본 백엔드 URL: `http://127.0.0.1:8000`
 - 기본 프론트엔드 URL: `http://127.0.0.1:5173`
 
-`YOUR_LINKEDIN_ID`는 실제 LinkedIn 프로필 ID로 교체하세요. 예를 들어 프로필 주소가
-`https://www.linkedin.com/in/example-id/`이면 LinkedIn ID는 `example-id`입니다.
+LinkedIn ID는 프로필 주소의 `/in/` 뒤에 오는 값입니다. 현재 배포 담당 LinkedIn ID는
+`minyong-choi-a60645260`입니다.
 
 ## 배포 구성
 
@@ -140,7 +140,7 @@ Frontend:
 
 ## 릴리즈 체크리스트
 
-- [ ] LinkedIn ID를 `YOUR_LINKEDIN_ID`에서 실제 ID로 교체
+- [x] LinkedIn ID를 실제 ID로 교체
 - [ ] `README.md`와 이 문서의 포트/URL 확인
 - [ ] Backend dependency 설치 확인
 - [ ] Frontend dependency 설치 확인
